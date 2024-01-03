@@ -1,4 +1,3 @@
--------
 #mapowanie danych na wykresie
 install.packages('ggplot2')
 library('ggplot2')
@@ -115,3 +114,7 @@ ggplot(dane) +
   xlab("Ilość zakupionych produktów") +
   ylab("Miesiąc")
 
+#skala kolorów
+ggplot(dane, aes(x = dane$month, y = dane$City, fill = mean)) + 
+  geom_tile() + 
+  coord_fixed(expand = FALSE)
