@@ -1,28 +1,29 @@
+-------
 #mapowanie danych na wykresie
 install.packages('ggplot2')
 library('ggplot2')
 #wizualizacja danych za pomocą wykresu kolumnowego- stosunek produktów do ceny wraz z podatkiem 
-ggplot(dane, aes(x = dane$Product.line, y = dane$Total, xlab="Produkt", ylab="Cena z podatkiem[$]", color = "yellow")) +
-  geom_col()
+ggplot(dane, aes(x = dane$Product.line, y = dane$Total)) +
+  geom_col(fill="lightpink2")
 # wizualizacja danych za pomocą wykresu pudełkowego- stosunek produktów do ceny wraz z podatkiem 
-ggplot(dane, aes(x = dane$Product.line, y = dane$Total, color = "red")) +
-  geom_boxplot(size=2)
+ggplot(dane, aes(x = dane$Product.line, y = dane$Total)) +
+  geom_boxplot(size=2, fill="red")
 
 # wizualizacja danych za pomocą wykresu kolumnowego- stosunek miasta do ceny wraz z podatkiem
 
 ggplot(dane, aes(x = dane$City, y = dane$Total)) +
-  geom_col()+
+  geom_col(fill="green4")+
   xlab("Miasto") +
   ylab("Cena wraz z podatkiem [$]")
 
 #wizualizacja danych za pomocą wykresu kolumnowego- stosunek miasta do satysfakcji klienta
 ggplot(dane, aes(x = dane$City, y = dane$Rating)) +
-  geom_col(size=1)+
+  geom_col(size=1, fill="black")+
   xlab("Miasto") +
   ylab("Satysfakcja klienta")
 #wizualizacja danych za pomocą wykresu kolumnowego- stosunek ceny do satysfakcji klienta
 ggplot(dane, aes(x = dane$Total, y = dane$Rating)) +
-  geom_col(size=1)+
+  geom_col(size=1, fill="blue4")+
   xlab("Cena z podatkiem") +
   ylab("Satysfakcja klienta")
 
@@ -31,24 +32,86 @@ install.packages(tidyverse)
 library(tidyverse)
 #wizualizacja ilości ocen satysfakcji klienta
 ggplot(dane, aes(dane$Rating)) +
-  geom_bar()+
+  geom_bar(fill="purple4")+
   xlab("Satysfakcja klienta") +
   ylab("Ilość ocen")
 
 #wizualizacja ilości miast-ile razy wykonywano zakupy w tym mieście
 ggplot(dane, aes(dane$City)) +
-  geom_bar()+
+  geom_bar(fill="lightgreen")+
   xlab("Miasto") +
   ylab("Ilość faktur")
 
 #wizualizacja ilości płatności z podziałem na rodzaje
 ggplot(dane, aes(dane$Payment)) +
-  geom_bar()+
+  geom_bar(fill="lightpink")+
   xlab("Rodzaj płatności") +
   ylab("Ilość")
 
 #wizualizacja ilości grup produktu z podziałem na rodzaje
 ggplot(dane, aes(dane$Product.line)) +
-  geom_bar()+
+  geom_bar(fill="orange2")+
   xlab("Rodzaj produktu") +
   ylab("Ilość")
+
+
+#wizualizacja rozkładów
+#wizualizacja rozkładów-ilość produktów zakupionych przez klientów
+ggplot(dane, aes(dane$Quantity)) +
+  geom_histogram(fill="lightblue")+
+  xlab("Ilość produktów") +
+  ylab("Potwórzenia ilości produktów zakupionych przez klientów")
+
+#wizualizacja rozkładów-ile razy kupiono produkt za daną cenę 
+ggplot(dane, aes(dane$Unit.price)) +
+  geom_histogram(fill="grey")+
+  xlab("Cena każdego produktu [$]") +
+  ylab("Ilość powtórzeń")
+
+#wizualizacja rozkładów- Opłata podatkowa w wysokości 5% dla klienta dokonującego zakupu-density
+ggplot(dane, aes(dane$Tax.5.)) +
+geom_density(fill = "cornsilk")+
+  xlab("Opłata podatkowa") +
+  ylab("Ilość powtórzeń występującej opłaty podatkowej")
+
+#wizualizacja rozkładów z podziałem na oddział supercentrum-ile razy kupiono produkt za daną cenę
+ggplot(dane, aes(dane$Unit.price)) +
+  geom_histogram(binwidth = 4, center = 2.5, fill = "green3") +
+  facet_wrap(vars(dane$Branch)) +
+  xlab("Cena każdego produktu [$]") +
+  ylab("Ilość powtórzeń")
+
+#wizualizacja rozkładów z podziałem na płcie-ilość ocen satysfakcji- Small multiples (facets)
+ggplot(dane, aes(dane$Rating)) +
+  geom_histogram(binwidth = 4, center = 2.5, fill = "pink") +
+  facet_wrap(vars(dane$Gender)) +
+  xlab("Ocena satysfakcji") +
+  ylab("Ilość powtórzeń")
+
+#wizualizacja rozkładów z podziałem na płcie-ilość ocen satysfakcji- Manipulating stats
+ggplot(dane, aes(dane$Time, y = after_stat(dane$Unit.price))) + 
+  geom_density(fill = "cornsilk", bw = 2) +
+  facet_wrap(vars(dane$Gender, dane$Tax.5.))
+
+install.packages("colorspace")
+library(colorspace)
+library(ggforce)
+library(ggridges)
+
+#wizualizacja rozkładów z podziałem na miesiące - ceny z podatatkiem
+
+dane$month <- format( as.Date (dane$Date, format=" %m/%d/%Y ")," %m ")
+ggplot(dane, aes(x = dane$month, y = dane$Total)) +
+  geom_point(size = 0.75, fill="black") +
+      xlab("Miesiąc") +
+      ylab("Cena z podatkiem")
+
+#Skale i układy współrzędnych
+#skale i układy współrzędnych- skala liczby zakupionych produktów w danych miesiącach
+library(tidyverse)
+ggplot(dane) +
+  aes(dane$Quantity, fct_reorder(dane$month, dane$Quantity)) +
+  geom_col(fill("yellow")) +
+  xlab("Ilość zakupionych produktów") +
+  ylab("Miesiąc")
+
