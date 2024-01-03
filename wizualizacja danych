@@ -1,5 +1,54 @@
 #mapowanie danych na wykresie
 install.packages('ggplot2')
 library('ggplot2')
-ggplot(dane, aes(x = dane$Product.line, y = dane$Unit.price)) +
+#wizualizacja danych za pomocą wykresu kolumnowego- stosunek produktów do ceny wraz z podatkiem 
+ggplot(dane, aes(x = dane$Product.line, y = dane$Total, xlab="Produkt", ylab="Cena z podatkiem[$]", color = "yellow")) +
   geom_col()
+# wizualizacja danych za pomocą wykresu pudełkowego- stosunek produktów do ceny wraz z podatkiem 
+ggplot(dane, aes(x = dane$Product.line, y = dane$Total, color = "red")) +
+  geom_boxplot(size=2)
+
+# wizualizacja danych za pomocą wykresu kolumnowego- stosunek miasta do ceny wraz z podatkiem
+
+ggplot(dane, aes(x = dane$City, y = dane$Total)) +
+  geom_col()+
+  xlab("Miasto") +
+  ylab("Cena wraz z podatkiem [$]")
+
+#wizualizacja danych za pomocą wykresu kolumnowego- stosunek miasta do satysfakcji klienta
+ggplot(dane, aes(x = dane$City, y = dane$Rating)) +
+  geom_col(size=1)+
+  xlab("Miasto") +
+  ylab("Satysfakcja klienta")
+#wizualizacja danych za pomocą wykresu kolumnowego- stosunek ceny do satysfakcji klienta
+ggplot(dane, aes(x = dane$Total, y = dane$Rating)) +
+  geom_col(size=1)+
+  xlab("Cena z podatkiem") +
+  ylab("Satysfakcja klienta")
+
+#wizualizacja ilości
+install.packages(tidyverse)
+library(tidyverse)
+#wizualizacja ilości ocen satysfakcji klienta
+ggplot(dane, aes(dane$Rating)) +
+  geom_bar()+
+  xlab("Satysfakcja klienta") +
+  ylab("Ilość ocen")
+
+#wizualizacja ilości miast-ile razy wykonywano zakupy w tym mieście
+ggplot(dane, aes(dane$City)) +
+  geom_bar()+
+  xlab("Miasto") +
+  ylab("Ilość faktur")
+
+#wizualizacja ilości płatności z podziałem na rodzaje
+ggplot(dane, aes(dane$Payment)) +
+  geom_bar()+
+  xlab("Rodzaj płatności") +
+  ylab("Ilość")
+
+#wizualizacja ilości grup produktu z podziałem na rodzaje
+ggplot(dane, aes(dane$Product.line)) +
+  geom_bar()+
+  xlab("Rodzaj produktu") +
+  ylab("Ilość")
