@@ -1,1 +1,29 @@
+  #analiza opisowa
+  #Skale pomiarowe, tabele a wykresy - TUTORIAL
+range(dane$Total)  # min and max values of price_PLN
+## [1] 10.6785 ,1042.6500
+max(dane$Total)-min(dane$Total) #difference between min and max
+## [1] 1031,972
+limits<-cut(dane$Total,seq(10.6785,1042.6500,by=100000))  #setting limits of our classes
+table1<-table(limits) #finally grouping our prices
+transform(table1,Rel_Freq=prop.table(Freq),Cum_Freq=cumsum(Freq)) #better look
+
+# limits Freq Rel_Freq Cum_Freq
+1      (9.65,114]  233    0.233      233
+2       (114,217]  215    0.215      448
+3       (217,320]  146    0.146      594
+4       (320,423]  110    0.110      704
+5       (423,527]   91    0.091      795
+6       (527,630]   68    0.068      863
+7       (630,733]   45    0.045      908
+8       (733,836]   51    0.051      959
+9       (836,939]   25    0.025      984
+10 (939,1.04e+03]   16    0.016     1000
+
+hist(dane$Total,prob=TRUE,breaks=seq(10.6785,1042.6500,by=100000),main="Total",sub="w $")
+lines(density(dane$Total),col=6) 
+-
+tab1<-dane$City(dane$Total,n=10,style="fixed",fixedBreaks=seq(10.6785,1042.6500,by=100000))
+#tabular accuracy index
+jenks.tests(tab1)
 
