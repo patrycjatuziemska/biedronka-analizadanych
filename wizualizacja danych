@@ -1,0 +1,5 @@
+#mapowanie danych na wykresie
+install.packages('ggplot2')
+library('ggplot2')
+ggplot(dane, aes(x = dane$Product.line, y = dane$Unit.price)) +
+  geom_col()
