@@ -27,3 +27,43 @@ tab1<-dane$City(dane$Total,n=10,style="fixed",fixedBreaks=seq(10.6785,1042.6500,
 #tabular accuracy index
 jenks.tests(tab1)
 
+#statystyki dla całkowitej sprzedaży wraz z podatkiem
+library(dplyr)
+library(kableExtra)
+dane%>%
+  group_by(category)%>%
+  rename(Kategoria=category)%>%
+  summarize('Suma sprzedaży'=sum(dane$Total),
+            'Średnia sprzedaż'=mean(dane$Total),
+            'Mediana sprzedaży'=median(dane$Total),
+            'Minimalna sprzedaż'=min(dane$Total),
+            'Maksymalna sprzedaż'=max(dane$Total))%>%
+  arrange(desc('Suma sprzedaży')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+# statystyki dla oceny satysfakcji klienta
+
+dane%>%
+  group_by()%>%
+  rename()%>%
+  summarize('Suma ocen satysfakcji klientów'=sum(dane$Rating),
+            'Średnia ocen satysfakcji'=mean(dane$Rating),
+            'Mediana ocen satysfakcji'=median(dane$Rating),
+            'Minimalna ocena satysfakcji'=min(dane$Rating),
+            'Maksymalna ocena satysfakcji'=max(dane$Rating))%>%
+  arrange(desc('Suma ocen satysfakcji')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+#statystyki dla cen produktów
+
+dane%>%
+  group_by()%>%
+  rename()%>%
+  summarize('Suma cen produktów'=sum(dane$Unit.price),
+            'Średnia cen produktów'=mean(dane$Unit.price),
+            'Mediana cen produktów'=median(dane$Unit.price),
+            'Minimalna cen produktów'=min(dane$Unit.price,
+            'Maksymalna cena produktów'=max(dane$Unit.price))%>%
+  arrange(desc('Suma cen produktów')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
