@@ -1,12 +1,15 @@
 #mapowanie danych na wykresie
 install.packages('ggplot2')
 library('ggplot2')
+
 #wizualizacja danych za pomocą wykresu kolumnowego- stosunek produktów do ceny wraz z podatkiem 
 ggplot(dane, aes(x = dane$Product.line, y = dane$Total)) +
-  geom_col(fill="lightpink2")
-# wizualizacja danych za pomocą wykresu pudełkowego- stosunek produktów do ceny wraz z podatkiem 
-ggplot(dane, aes(x = dane$Product.line, y = dane$Total)) +
-  geom_boxplot(size=2, fill="red")
+  geom_col(fill="lightpink2")+
+  xlab("Kryteria produktów") +
+  ylab("Cena wraz z podatkiem [$]")
+#Interpteacja: Analizując kryterię produktów oraz ceny, które mają już wliczony podatek, to w sklepie dyskontowym
+#Biedronka najdroższe produkty względem cenowym znajdują się w jedzeniach i napojach, co uważamy, że jest zjawiskiem
+#negatywnym, ponieważ podatki stanowią większość ceny przez podatek cukrowy. 
 
 # wizualizacja danych za pomocą wykresu kolumnowego- stosunek miasta do ceny wraz z podatkiem
 
@@ -14,17 +17,18 @@ ggplot(dane, aes(x = dane$City, y = dane$Total)) +
   geom_col(fill="green4")+
   xlab("Miasto") +
   ylab("Cena wraz z podatkiem [$]")
+#Intepretacja: Biorąc pod uwagę miasta oraz cena z wliczony z podatkiem, można wysunąć pewne wnioski, a mianowicie
+# miasto Naypyitaw charakteryzuje się najdroższymi produktami, z kolei dwa pozostałe miasta pod nazwami: Mandalay
+#i Yangon są na tym samym poziomie. 
 
-#wizualizacja danych za pomocą wykresu kolumnowego- stosunek miasta do satysfakcji klienta
-ggplot(dane, aes(x = dane$City, y = dane$Rating)) +
-  geom_col(size=1, fill="black")+
-  xlab("Miasto") +
-  ylab("Satysfakcja klienta")
 #wizualizacja danych za pomocą wykresu kolumnowego- stosunek ceny do satysfakcji klienta
 ggplot(dane, aes(x = dane$Total, y = dane$Rating)) +
   geom_col(size=1, fill="blue4")+
   xlab("Cena z podatkiem") +
   ylab("Satysfakcja klienta")
+#Intepretacja: Biorąc pod uwagę stosunek satysfakcji klienta do samej ceny z wliczonym podatkiem, można
+#wysunąc następujące wnioski: największą liczbą ocen charakteryzują się ceny w okolicach 500$, zaś najmniejszą 
+#liczbą ocen ceny równe 1000$, bądź wyższe.
 
 #wizualizacja ilości
 install.packages(tidyverse)
@@ -34,18 +38,25 @@ ggplot(dane, aes(dane$Rating)) +
   geom_bar(fill="purple4")+
   xlab("Satysfakcja klienta") +
   ylab("Ilość ocen")
+#Intepretacja: Analizując poniższy wykres można stwierdzić, iż największą ilością ocen satysfakcji kleinta
+#zyskała ocena 6. Jest to powyżej połowy, co jest pozytywnym wynikiem dla sklepu dyskontowego.
 
 #wizualizacja ilości miast-ile razy wykonywano zakupy w tym mieście
 ggplot(dane, aes(dane$City)) +
   geom_bar(fill="lightgreen")+
   xlab("Miasto") +
   ylab("Ilość faktur")
+#Intepretacja: Powyższy wykres przedstawia ilość wykonanych zakupów w oparciu o trzy miasta. Największą ilością
+#zakup charakteryzuje się miasto Yangon, zaś najmniejszą Naypyitaw.
 
 #wizualizacja ilości płatności z podziałem na rodzaje
 ggplot(dane, aes(dane$Payment)) +
   geom_bar(fill="lightpink")+
   xlab("Rodzaj płatności") +
   ylab("Ilość")
+#Intepretacja: Wykres przedstawia ilość płatności z podziałem na rodzaje. Największym zainteresowaniem cieszy się 
+#tradycyjna płatność, czyli płatność gotówką oraz elektronicznym portfelem, natomiast najmniejszym karta kredytowa
+#jest to duże zaskoczenie, patrząc na to, że coraz więcej społeczeństwa odbiega od używania gotówki.
 
 #wizualizacja ilości grup produktu z podziałem na rodzaje
 ggplot(dane, aes(dane$Product.line)) +
@@ -53,6 +64,8 @@ ggplot(dane, aes(dane$Product.line)) +
   xlab("Rodzaj produktu") +
   ylab("Ilość")
 
+#Intepretacja:Wykres kolumnowy przedstawia ilość produktów, które posiada każdy z rodzai produktów.
+# Najwięcej produktów posiada grupa pod nazwą:modowe akcesoria, zaś najmniejszą: zdrowie i uroda. 
 
 #wizualizacja rozkładów
 #wizualizacja rozkładów-ilość produktów zakupionych przez klientów
@@ -60,18 +73,18 @@ ggplot(dane, aes(dane$Quantity)) +
   geom_histogram(fill="lightblue")+
   xlab("Ilość produktów") +
   ylab("Potwórzenia ilości produktów zakupionych przez klientów")
+#Intepretacja: Wykres przedstawia powtórzenia w kontekście ilości produktó zakupionych przez klientów
+#sklepu. Największy wynik wynosi 10 produktów, ponieważ powtórzył się on ponad 100 razy. Natomiast 
+#najmniejszą ilością charakteryzuje się ilość 8 produktów, bo powtórzenia wyniosły tylko ok. 86 powtórzeń. 
 
-#wizualizacja rozkładów-ile razy kupiono produkt za daną cenę 
-ggplot(dane, aes(dane$Unit.price)) +
-  geom_histogram(fill="grey")+
-  xlab("Cena każdego produktu [$]") +
-  ylab("Ilość powtórzeń")
 
 #wizualizacja rozkładów- Opłata podatkowa w wysokości 5% dla klienta dokonującego zakupu-density
 ggplot(dane, aes(dane$Tax.5.)) +
 geom_density(fill = "cornsilk")+
   xlab("Opłata podatkowa") +
   ylab("Ilość powtórzeń występującej opłaty podatkowej")
+#Intepretacja: Wykres przedstawia rozkład opłat podatkowych w wysokości 5% dla kllienta dokonującego
+#zakupy można śmiało stwierdzić, że największą ilościa charakteryzuje się podatek o wysokości ok. 6-7$.
 
 #wizualizacja rozkładów z podziałem na oddział supercentrum-ile razy kupiono produkt za daną cenę
 ggplot(dane, aes(dane$Unit.price)) +
@@ -79,6 +92,9 @@ ggplot(dane, aes(dane$Unit.price)) +
   facet_wrap(vars(dane$Branch)) +
   xlab("Cena każdego produktu [$]") +
   ylab("Ilość powtórzeń")
+#intepretacja: Wizualizacja rozkładów z podziałem na oddział supercentrum pokazuje nam ile razy kupiono
+#produkt za daną cenę. Największymi wynikami wyróżnia się supercentrum C, czyli miejscowość Naypyitaw, 
+#ponieważ posiada największą ilość powtórzeń ceny 100 $ w porównaniu z  innymi oddziałami.
 
 #wizualizacja rozkładów z podziałem na płcie-ilość ocen satysfakcji- Small multiples (facets)
 ggplot(dane, aes(dane$Rating)) +
@@ -87,10 +103,10 @@ ggplot(dane, aes(dane$Rating)) +
   xlab("Ocena satysfakcji") +
   ylab("Ilość powtórzeń")
 
-#wizualizacja rozkładów z podziałem na płcie-ilość ocen satysfakcji- Manipulating stats
-ggplot(dane, aes(dane$Time, y = after_stat(dane$Unit.price))) + 
-  geom_density(fill = "cornsilk", bw = 2) +
-  facet_wrap(vars(dane$Gender, dane$Tax.5.))
+#Intepretacja:Wizualizacja rozkładów obrazuje nam ilość ocen satysfakcji w oparciu na podział względem  płci. 
+#Męzczyzni wyróżniają się na tyle kobiet, ponieważ najczęściej z większą ilością powtórzeń wybierali oceny w przedziale od 5.0-8.0.
+# Kobiety również skłaniały się do tego samego przedziału jednakże możemy zauważyć, że sklep Biedronka posiada więcej klientów płci męskiej,
+# niż płci żeńskiej. 
 
 install.packages("colorspace")
 library(colorspace)
@@ -100,21 +116,10 @@ library(ggridges)
 #wizualizacja rozkładów z podziałem na miesiące - ceny z podatatkiem
 
 dane$month <- format( as.Date (dane$Date, format=" %m/%d/%Y ")," %m ")
-ggplot(dane, aes(x = dane$month, y = dane$Total)) +
+ggplot(dane, aes(x = dane$month, y = dane$gross.income)) +
   geom_point(size = 0.75, fill="black") +
       xlab("Miesiąc") +
-      ylab("Cena z podatkiem")
-
-#Skale i układy współrzędnych
-#skale i układy współrzędnych- skala liczby zakupionych produktów w danych miesiącach
-library(tidyverse)
-ggplot(dane) +
-  aes(dane$Quantity, fct_reorder(dane$month, dane$Quantity)) +
-  geom_col(fill("yellow")) +
-  xlab("Ilość zakupionych produktów") +
-  ylab("Miesiąc")
-
-#skala kolorów
-ggplot(dane, aes(x = dane$month, y = dane$City, fill = mean)) + 
-  geom_tile() + 
-  coord_fixed(expand = FALSE)
+      ylab("Dochód brutto")
+#Intepretacja: analizując rozkład, który opiera się podziałem na miesiące względem dochodu brutto, 
+#można śmiało stwierdzić iż styczeń był najbardziej dochodowym miesiącem, jeśli chodzi o ceny posiadające wysoki zysk brutto
+#natomiast najmniejszego można zaliczyć marzec. 
