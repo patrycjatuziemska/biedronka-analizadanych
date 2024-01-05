@@ -1,69 +1,81 @@
-  #analiza opisowa
-  #Skale pomiarowe, tabele a wykresy - TUTORIAL
-range(dane$Total)  # min and max values of price_PLN
+ #analiza opisowa
+  #Skale pomiarowe, tabele a wykresy 
+range(dane$Total)  # min and max ceny z wliczonym podatkiem
 ## [1] 10.6785 ,1042.6500
+#Intepretacja: Biedronka charakteryzuje się minimalną (10.68) oraz maksymalną ceną z podatkiem (1042,65), co pokazuje, że sklep 
+#dyskontowy charakteryzuje się różnorodnościa odnośnie zakresu w produktach jakie posiada.
 max(dane$Total)-min(dane$Total) #difference between min and max
 ## [1] 1031,972
-limits<-cut(dane$Total,seq(10.6785,1042.6500,by=100000))  #setting limits of our classes
+#Intepretacja: Różnica pomiędzy maksymalną ceną z wliczonym podatkiem, a minimalnym wynosi 1031,97.
+
+limits<-cut(dane$Total,seq(0,1100,by=100))  #setting limits of our classes
 table1<-table(limits) #finally grouping our prices
 transform(table1,Rel_Freq=prop.table(Freq),Cum_Freq=cumsum(Freq)) #better look
 
 # limits Freq Rel_Freq Cum_Freq
-1      (9.65,114]  233    0.233      233
-2       (114,217]  215    0.215      448
-3       (217,320]  146    0.146      594
-4       (320,423]  110    0.110      704
-5       (423,527]   91    0.091      795
-6       (527,630]   68    0.068      863
-7       (630,733]   45    0.045      908
-8       (733,836]   51    0.051      959
-9       (836,939]   25    0.025      984
-10 (939,1.04e+03]   16    0.016     1000
+1          (0,100]  208    0.208      208
+2        (100,200]  202    0.202      410
+3        (200,300]  159    0.159      569
+4        (300,400]  111    0.111      680
+5        (400,500]   93    0.093      773
+6        (500,600]   67    0.067      840
+7        (600,700]   51    0.051      891
+8        (700,800]   51    0.051      942
+9        (800,900]   32    0.032      974
+10     (900,1e+03]   17    0.017      991
+11 (1e+03,1.1e+03]    9    0.009     1000
 
-hist(dane$Total,prob=TRUE,breaks=seq(10.6785,1042.6500,by=100000),main="Total",sub="w $")
+hist(dane$Total,prob=TRUE,breaks=seq(0,1100,by=100),main="Total",sub="w $")
 lines(density(dane$Total),col=6) 
--
-tab1<-dane$City(dane$Total,n=10,style="fixed",fixedBreaks=seq(10.6785,1042.6500,by=100000))
+install.packages("classInt")
+library(classInt)
+
+tab1<-classIntervals(dane$Total,n=11,style="fixed",fixedBreaks=seq(0,1100,by=100))
+tab1
 #tabular accuracy index
 jenks.tests(tab1)
 
 #statystyki dla całkowitej sprzedaży wraz z podatkiem
+install.packages(dplyr)
+install.packages("kableExtra")
 library(dplyr)
 library(kableExtra)
+
 dane%>%
-  group_by(category)%>%
-  rename(Kategoria=category)%>%
+  group_by(Gender)%>%
   summarize('Suma sprzedaży'=sum(dane$Total),
             'Średnia sprzedaż'=mean(dane$Total),
             'Mediana sprzedaży'=median(dane$Total),
             'Minimalna sprzedaż'=min(dane$Total),
-            'Maksymalna sprzedaż'=max(dane$Total))%>%
+            'Maksymalna sprzedaż'=max(dane$Total),
+            'Odchylenie standardowe'=sd(dane$Total))%>%
   arrange(desc('Suma sprzedaży')) %>%
   kbl()%>%
   kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
 # statystyki dla oceny satysfakcji klienta
 
 dane%>%
-  group_by()%>%
-  rename()%>%
+  group_by(City)%>%
   summarize('Suma ocen satysfakcji klientów'=sum(dane$Rating),
             'Średnia ocen satysfakcji'=mean(dane$Rating),
             'Mediana ocen satysfakcji'=median(dane$Rating),
             'Minimalna ocena satysfakcji'=min(dane$Rating),
-            'Maksymalna ocena satysfakcji'=max(dane$Rating))%>%
+            'Maksymalna ocena satysfakcji'=max(dane$Rating),
+            'Odchylenie standardowe'=sd(dane$Rating))%>%
   arrange(desc('Suma ocen satysfakcji')) %>%
   kbl()%>%
   kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
 #statystyki dla cen produktów
 
 dane%>%
-  group_by()%>%
-  rename()%>%
-  summarize('Suma cen produktów'=sum(dane$Unit.price),
-            'Średnia cen produktów'=mean(dane$Unit.price),
-            'Mediana cen produktów'=median(dane$Unit.price),
-            'Minimalna cen produktów'=min(dane$Unit.price,
-            'Maksymalna cena produktów'=max(dane$Unit.price))%>%
-  arrange(desc('Suma cen produktów')) %>%
+  group_by(Product.line)%>%
+  summarize('Suma ocen satysfakcji klientów'=sum(dane$Rating),
+            'Średnia ocen satysfakcji'=mean(dane$Rating),
+            'Mediana ocen satysfakcji'=median(dane$Rating),
+            'Minimalna ocena satysfakcji'=min(dane$Rating),
+            'Maksymalna ocena satysfakcji'=max(dane$Rating),
+            'Odchylenie standardowe'=sd(dane$Product.line))%>%
+  arrange(desc('Suma ocen satysfakcji')) %>%
   kbl()%>%
   kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+ 
