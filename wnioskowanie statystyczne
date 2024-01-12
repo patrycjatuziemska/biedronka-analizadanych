@@ -1,0 +1,53 @@
+# wnioskowanie statystyczne
+#hipotezy 
+
+install.packages("ggstatsplot")
+library(ggstatsplot)
+#1 Kobiety  kupują więcej produktów z kategorii: zdrowie i uroda. 
+data=dane
+x=dane$Gender
+y=dane$Product.line
+ggpiestats(x=Gender,
+           y=Product.line,
+           data=dane)
+#pv=0,33 nie ma istotnej różnicy 
+#Hipoteza nie została potwierdzona, co wskazują poniższe diagramy. W kategorii zdrowie i uroda, to mężczyżni
+#wydają więcej niż kobiety. Stosunek procentowy wyniósł 58% u mężczyzn do 42% u kobiet. P-value wynosi
+#0,33, co pokazuje, że nie ma istotnej różnicy.  
+
+#2 Mężczyżni kupują więcej produktów z kategorii: elektronika.
+data=dane
+x=dane$Gender
+y=dane$Product.line
+ggpiestats(x=Gender,
+           y=Product.line,
+           data=dane)
+#Hipoteza została potwierdzona, co wskazują poniższe diagramy. W kategorii elektronika, to mężczyżni
+#wydają więcej niż kobiety. Stosunek procentowy wyniósł 51% u mężczyzn do 49% u kobiet, nie jest to jednak znacząca różnica. P-value wynosi
+#0,33, co pokazuje, że nie ma istotnej różnicy.
+
+
+#3. Klienci, którzy posiadają kartę lojalnościową wydają mniej, niż osoby, które nie mają karty. 
+data=dane
+x=dane$Customer.type
+y=dane$Total
+
+ggbetweenstats(x=Customer.type,
+           y=Total,
+           data=dane)
+#p=0,53 nie ma istotnej różnicy
+
+#Hipoteza została nie potwierdzona, co wskazują poniższe diagramy.Klienci posiadający kartę lojalnościową wydaję więcej niż, osoby które jej nie posiadają.
+#Średnia wydatków klientów posiadających  kartę wynosi 327.79, a którzy jej nie posiadają 318.12. 
+#P-value wyniosło 0,53, więc nie ma istotnej różnicy. 
+#4. Mężczyżni częściej płacą za zakupy eportfelem.
+data=dane
+x=dane$Gender
+y=dane$Payment
+ggpiestats(x=Gender,
+           y=Payment,
+           data=dane)
+#p=0,23 nie ma istotnej różnicy 
+#Hipoteza została potwierdzona, co wskazują poniższe diagramy. W kategorii płacenia eportfelem, to mężczyżni
+#korzystają częściej z tej formy niż kobiety. Stosunek procentowy wyniósł 54% u mężczyzn do 46% u kobiet, nie jest to jednak znacząca różnica. P-value wynosi
+#0,23, co pokazuje, że nie ma istotnej różnicy.
