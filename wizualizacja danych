@@ -73,7 +73,7 @@ ggplot(dane, aes(dane$Quantity)) +
   geom_histogram(fill="lightblue")+
   xlab("Ilość produktów") +
   ylab("Potwórzenia ilości produktów zakupionych przez klientów")
-#Intepretacja: Wykres przedstawia powtórzenia w kontekście ilości produktó zakupionych przez klientów
+#Intepretacja: Wykres przedstawia powtórzenia w kontekście ilości produktów zakupionych przez klientów
 #sklepu. Największy wynik wynosi 10 produktów, ponieważ powtórzył się on ponad 100 razy. Natomiast 
 #najmniejszą ilością charakteryzuje się ilość 8 produktów, bo powtórzenia wyniosły tylko ok. 86 powtórzeń. 
 
