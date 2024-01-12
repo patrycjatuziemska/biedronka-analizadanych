@@ -1,4 +1,4 @@
- #analiza opisowa
+#analiza opisowa
   #Skale pomiarowe, tabele a wykresy 
 range(dane$Total)  # min and max ceny z wliczonym podatkiem
 ## [1] 10.6785 ,1042.6500
@@ -35,47 +35,87 @@ tab1
 #tabular accuracy index
 jenks.tests(tab1)
 
-#statystyki dla całkowitej sprzedaży wraz z podatkiem
-install.packages(dplyr)
+#statystyki dla całkowitej sprzedaży wraz z podatkiem posortowane według płci
+install.packages("dplyr")
 install.packages("kableExtra")
 library(dplyr)
 library(kableExtra)
 
 dane%>%
   group_by(Gender)%>%
-  summarize('Suma sprzedaży'=sum(dane$Total),
-            'Średnia sprzedaż'=mean(dane$Total),
-            'Mediana sprzedaży'=median(dane$Total),
-            'Minimalna sprzedaż'=min(dane$Total),
-            'Maksymalna sprzedaż'=max(dane$Total),
-            'Odchylenie standardowe'=sd(dane$Total))%>%
+  summarize('Suma sprzedaży'=sum(Total),
+            'Średnia sprzedaż'=mean(Total),
+            'Mediana sprzedaży'=median(Total),
+            'Minimalna sprzedaż'=min(Total),
+            'Maksymalna sprzedaż'=max(Total),
+            'Odchylenie standardowe'=sd(Total))%>%
   arrange(desc('Suma sprzedaży')) %>%
   kbl()%>%
   kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
-# statystyki dla oceny satysfakcji klienta
+
+# Wnioski: Analizując statystyki opisowe z podziałem na płeć w kontekście sprzedaży, można wyciągnąć wiele wniosków. 
+#Średnia sprzedaż dla kobiet wyniosła 335,10$, a dla mężczyzn 310,79$, jest to mniej niż dla płci przeciwnej, tylko o około 25$. Z kolei Maksymalna 
+#sprzedaż wyniosła u kobiet 1042,65$, a u mężczyzn 1039,29$. Odchylenie standardowe dla płci pięknej wyniosło 249,32$, a dla płci
+#przeciwnej 242,02$. Statystyki opisowe wskazują na to, że wydatki na zakupy nie różnią się  szczególnie między badanymi płciami. 
+
+
+# statystyki dla oceny satysfakcji klienta względem miast 
 
 dane%>%
   group_by(City)%>%
-  summarize('Suma ocen satysfakcji klientów'=sum(dane$Rating),
-            'Średnia ocen satysfakcji'=mean(dane$Rating),
-            'Mediana ocen satysfakcji'=median(dane$Rating),
-            'Minimalna ocena satysfakcji'=min(dane$Rating),
-            'Maksymalna ocena satysfakcji'=max(dane$Rating),
-            'Odchylenie standardowe'=sd(dane$Rating))%>%
+  summarize('Suma ocen satysfakcji klientów'=sum(Rating),
+            'Średnia ocen satysfakcji'=mean(Rating),
+            'Mediana ocen satysfakcji'=median(Rating),
+            'Minimalna ocena satysfakcji'=min(Rating),
+            'Maksymalna ocena satysfakcji'=max(Rating),
+            'Odchylenie standardowe'=sd(Rating))%>%
   arrange(desc('Suma ocen satysfakcji')) %>%
   kbl()%>%
   kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
-#statystyki dla cen produktów
+
+# Wnioski: Analizując statystyki opisowe z podziałem na miasta w ocen satysfakcji klientów, można wyciągnąć wiele wniosków. 
+#Średnia ocen satysfakcji dla Mandalay wyniosła 6,82, dla Naypyitaw 7,07, z kolei dla Yangon niewiele mniej, bo 7,03. Z kolei minimalna 
+# ocena satysfkacji w każdym z wymienionych miast wyniosła 4. Odchylenie standardowe dla Mandalay wyniosło 1,71, a dla Naypyitaw
+# 1,70, z kolei dla Yangon 1,73, jest to zdecydowanie największe odchylenie standardowe. Statystyki opisowe wskazują na to, że najgiorzej zostały ocenione zakupy w mieście
+#Mandalay,a najlepiej w Naypyitaw. 
+
+#statystyki dla rodzajów produktów w oparciu o oceny satysfakcji klienta 
 
 dane%>%
   group_by(Product.line)%>%
-  summarize('Suma ocen satysfakcji klientów'=sum(dane$Rating),
-            'Średnia ocen satysfakcji'=mean(dane$Rating),
-            'Mediana ocen satysfakcji'=median(dane$Rating),
-            'Minimalna ocena satysfakcji'=min(dane$Rating),
-            'Maksymalna ocena satysfakcji'=max(dane$Rating),
-            'Odchylenie standardowe'=sd(dane$Product.line))%>%
+  summarize('Suma ocen satysfakcji klientów'=sum(Rating),
+            'Średnia ocen satysfakcji'=mean(Rating),
+            'Mediana ocen satysfakcji'=median(Rating),
+            'Minimalna ocena satysfakcji'=min(Rating),
+            'Maksymalna ocena satysfakcji'=max(Rating),
+            'Odchylenie standardowe'=sd(Rating))%>%
   arrange(desc('Suma ocen satysfakcji')) %>%
   kbl()%>%
   kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
- 
+
+# Wnioski: Analizując statystyki opisowe z podziałem rodzaj produktów w kontekscie do ocen satysfakcji klientów, można wyciągnąć wiele wniosków. 
+#Średnia ocen satysfakcji dla elektroniki wyniosła 6,92, dla modowych akcesoriów wyniosło 7,03, kolejno dla jedzenia i napoi 7,11.
+#Z kolei zdrowie i uroda kształtowało się z wynikiem 7,00, a akcesoria domowe 6,84, na sam koniec sport i podróże kształtują się z wynikiem 6,91.
+# Minimalna cena satysfkacji w każdym z wymienionej kategorii produktów wyniosła 4, poza akcesoriami domowymi, gdzie wyniosło 4,1. 
+#Największym odchyleniem standardowym może się pochwalić zdrowie i uroda, kształtuję się z wymikiem 1,76.
+
+#statystyki dla rodzajów płatności w oparciu o całkowitą cenę wraz z podatkiem 
+
+dane%>%
+  group_by(Payment)%>%
+  summarize('Suma sprzedaży'=sum(Total),
+            'Średnia sprzedaż'=mean(Total),
+            'Mediana sprzedaży'=median(Total),
+            'Minimalna sprzedaż'=min(Total),
+            'Maksymalna sprzedaż'=max(Total),
+            'Odchylenie standardowe'=sd(Total))%>%
+  arrange(desc('Suma sprzedaży')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+
+# Wnioski: Analizując statystyki opisowe z podziałem na rodzaj płatności względem sum sprzedaży, można wyciągnąć wiele wniosków. 
+#Średnia sprzedaż dla formy płatności gotówkowej wyniosła 326,18, dla karty kredytowej 324,00, z kolei dla eportfela niewiele mniej, bo 318,82. Z kolei minimalna 
+# sprzedaż kwalifikowała się do płatności za pomocą gotówki. Odchylenie standardowe dla gotówki wyniosło 242,66, a dla karty kredytowej 
+# 257,11, z kolei dla Yangon eportfela 239,31. Karta kredytowa charakteryzuje się największym odchyleniem standardowym. 
+#Statystyki opisowe pokazują, że najczęstszą formą korzystania z płatności przez klientów była gotówkowa. 
+
