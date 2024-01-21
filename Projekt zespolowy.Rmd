@@ -1,0 +1,436 @@
+--- 
+title: "Inference from the sample" 
+subtitle: "Point and interval estimation" 
+author: "Patrycja Tuziemska, Beata Wachowicz, Piotr Szypuliński" 
+date: "`r Sys.Date()`" 
+output:   
+rmdformats::readthedown:     
+  self_contained: true     
+  thumbnails: false     
+  lightbox: true     
+  gallery: true
+---
+
+# Analiza danych projekt zespołowy 
+
+W ramach zaliczenia przedmiotu Analiza danych na kierunku Analityka Gospodarcza II 
+zostaliśmy zobligowani do wykonania specjalnego projektu wybranego przez prowadzącego.  
+Wylosowanym zestawem danych okazał się zbiór dotyczący supermarketów. 
+
+Niniejszy projekt składa się z sześciu części tematycznych odpowiednio wyróżnionych 
+nagłówkami stylu H2. 
+
+## Wprowadzenie 
+
+W dynamicznym świecie handlu detalicznego, rozwój supermarketów w najbardziej zaludnionych miastach osiąga coraz to nowe szczyty konkurencyjności. W kontekście tego zjawiska, kluczowym elementem staje się dogłębna analiza danych sprzedażowych 
+różnych supermarketów. Niniejszy projekt ma na celu zbadanie i zrozumienie trendów sprzedażowych w trzech oddziałach jedenej firmy będącej supermarketem, reprezentujących różnorodne lokalizacje i demografie klientów.
+
+Dane, na których opiera się ta analiza, zostały zebrane w ciągu trzech miesięcy, od stycznia do marca 2019 roku, i zawierają szczegółowe informacje na temat każdej transakcji. Fundamentami wykonanej w projekcie analizy są takie zmienne jak: numer identyfikacyjny faktury (Invoice ID), oddział, w którym dokonano zakupu (Branch), lokalizacja supermarketu (City), typ klienta (Customer type), płeć (Gender), linia produktów (Product line), cena jednostkowa (Unit price), ilość zakupionych produktów (Quantity), opłata podatkowa (Tax), całkowita cena zakupu (Total), data (Date) i czas transakcji (Time), metoda płatności (Payment), koszt sprzedanych towarów (COGS), procentowa marża brutto (Gross margin percentage), dochód brutto (Gross income) oraz ocena klienta (Rating).
+
+W kontekście rosnącej konkurencji na rynku, zrozumienie tych danych może okazać się kluczowe dla formułowania strategii biznesowych i w nadążaniu za dynamicznymi zmianami. Analizując, jak różne czynniki, takie jak lokalizacja, typ klienta czy wybór produktów, wpływają na wyniki sprzedaży, możemy lepiej zrozumieć potrzeby i preferencje konsumentów. To z kolei może prowadzić do bardziej celowych i skutecznych decyzji biznesowych, co jest niezwykle istotne w świecie, gdzie klient i jego doświadczenia stanowią o sukcesie firmy.
+
+Celem tego projektu jest nie tylko zrozumienie obecnych trendów, ale także identyfikacja potencjalnych obszarów do rozwoju i innowacji w branży supermarketów. Przez skupienie się na danych historycznych, projekt ten ma na celu dostarczenie wartościowych wskazówek dla przyszłych decyzji strategicznych i operacyjnych w branży supermarketów.
+
+## Data Cleansing & Data Wrangling - czyli czyścimy i ujednolicamy dane! 
+
+Pierwszy etap merytorycznej pracy z danymi, w żargonie analityków danych określany jako "Data Cleansing" oraz "Data Wrangling", to nic innego jak czyszczenie i ujednolicanie danych na potrzeby niniejszego projektu. 
+
+Zanim jednak wdrożone zostaną takie prace, należy wgrać dane do programu R i zerknąć na tablicę. W tym miejscu 
+zweryfikowaliśmy typy wszystkich zmiennych. 
+
+```{r}
+dane <- read.csv("Biedronki.csv")
+```
+
+Na potrzeby prac należy zainstalować niezbędne biblioteki, które towarzyszyć będą na etapie czyszcznia danych. 
+
+```{r}
+install.packages("tidyverse")
+install.packages("dlookr")
+install.packages("editrules")
+install.packages("VIM")
+install.packages("deducorrect")
+install.packages("ISLR")
+
+library(tidyverse)
+library(dlookr)
+library(editrules)
+library(VIM)
+library(deducorrect)
+library(ISLR) 
+```
+
+Przechodząc do czyszczenia,cały proces rozpoczeliśmy od sprawdzenia, ile przypadków danych jest kompletnych, czyli czy występując NA. Jednak braki danych to nie wszystko. Postanowiliśmy sprawdzić, czy w zbiorze danych znajdują się jakieś wartości specjalne. Do tego posłużyła specjalna funkcja. Na wypadek, gdyby pojawiły się jakieś wartości specjalne, zdecydowaliśmy się, że przypiszemy im wartości NA. W tym celu wykorzystaliśmy pętlę. Tak przeprowadzone operacje pozwalają wydrukować statystyki opisowe dla zmiennych. 
+ 
+```{r}
+sum(complete.cases(dane))
+
+is.special <- function(x){
+  if (is.numeric(x)) !is.finite(x) else is.na(x)}
+sapply(dane, is.special)
+
+for (n in colnames(dane)){
+  is.na(dane[[n]]) <- is.special(dane[[n]])
+}
+summary(dane)
+```
+
+Powyższy kod pozwala stwierdzić, że w zbiorze danych nie ma NA. Jednak postanowiliśmy zagłębić się jeszcze w słuszność tego twierdzenia. Ostatecznym potwierdzeniem będzie dla nas wizualizacja obecności ewentualnych NA. W tym celu pobraliśmy specjalny pakiet "naniar". 
+
+```{r}
+install.packages("naniar")
+library(naniar)
+vis_miss(dane)
+```
+
+Co do braków danych mamy już absolutną pewność. Dzięki temu możemy pójść dalej i spojrzeć na to jak ukształtowują się zmienne jakościowe (liczbowe). W tym celu wykorzystamy popularną metodę wizualizacji - wykresy pudełkowe.Taki zabieg na danych pozwoli na wyselekcjonowanie tych zmiennych ciągłych, które zawierają wartości odstające. 
+
+```{r}
+boxplot(dane$Unit.price)
+boxplot(dane$Tax.5.) #zawiera wartości odstające
+boxplot(dane$Total) #zawiera wartości odstające 
+boxplot(dane$cogs) #zawiera wartości odstające
+boxplot(dane$gross.margin.percentage) 
+boxplot(dane$gross.income) #zawiera wartości odstające
+boxplot(dane$Rating)
+```
+
+## Wizualizacja danych - spójrzmy jakie mamy informacje! 
+
+Po tym jak przeprowadziliśmy procedurę czyszczenia i ujednolicania naszych wejściowych danych, możemy skupić się na ich konkretnej wizualizacji. Postanowiliśmy za pomocą wykresu kolumnowego przedstawić stosunek produktów do ceny z podatkiem. Zwizuowaliśmy również stosunek miasta do ceny zawierającej podatek oraz stosunek miasta do satysfakcji klienta. Jednak zacznijmy od początku. 
+
+```{r}
+#install.packages('ggplot2')
+library('ggplot2')
+ggplot(dane, aes(x = dane$Product.line, y = dane$Total)) +
+  geom_col(fill="lightpink2") + 
+  xlab("Kryteria produktów") +
+  ylab("Cena wraz z podatkiem [$]")
+```
+
+Intepretacja: Analizując kryteria produktów oraz ceny, które mają już wliczony podatek, to w sklepie dyskontowym
+Biedronka najdroższe produkty względem cenowym znajdują się w jedzeniach i napojach, co uważamy, że jest zjawiskiem
+negatywnym, ponieważ podatki stanowią większość ceny przez podatek cukrowy. 
+
+Skupimy się teraz na stosunku miasta do ceny z obowiązującym podatkiem. 
+
+```{r}
+ggplot(dane, aes(x = dane$City, y = dane$Total)) +
+  geom_col(fill="green4")+
+  xlab("Miasto") +
+  ylab("Cena wraz z podatkiem [$]")
+```
+
+Interpretacja: Biorąc pod uwagę miasta oraz cena z wliczony z podatkiem, można wysunąć pewne wnioski, a mianowicie miasto Naypyitaw charakteryzuje się najdroższymi produktami, z kolei dwa pozostałe miasta pod nazwami: Mandalay i Yangon są na tym samym poziomie.
+
+Następnie postanowiliśmy zobrazować relację ceny do satysfakcji klienta. 
+
+```{r}
+ggplot(dane, aes(x = dane$Total, y = dane$Rating)) +
+  geom_col(size=1, fill="blue4")+
+  xlab("Cena z podatkiem") +
+  ylab("Satysfakcja klienta")
+```
+
+Interpretacja: Biorąc pod uwagę stosunek satysfakcji klienta do samej ceny z wliczonym podatkiem, można wysunąc następujące wnioski. Największą liczbą ocen charakteryzują się ceny w okolicach 500$, zaś najmniejszą liczbą ocen ceny równe 1000 dol, bądź wyższe.
+
+Najwyższy czas zatem zbadać kształtowanie się ilości. Zaczęliśmy od ilości ocen satysfakcji klienta. 
+
+```{r}
+ggplot(dane, aes(dane$Rating)) +
+  geom_bar(fill="purple4")+
+  xlab("Satysfakcja klienta") +
+  ylab("Ilość ocen")
+```
+
+Interpretacja: Analizując poniższy wykres można stwierdzić, iż największą ilością ocen satysfakcji klienta zyskała ocena 6. Jest to powyżej połowy, co jest pozytywnym wynikiem dla sklepu dyskontowego.
+
+Warto spojrzeć teraz na liczbę wykonanych zakupów w poszczególnych miastach. 
+
+```{r}
+ggplot(dane, aes(dane$City)) +
+  geom_bar(fill="lightgreen")+
+  xlab("Miasto") +
+  ylab("Ilość faktur")
+```
+
+Interpretacja: Powyższy wykres przedstawia ilość wykonanych zakupów w oparciu o trzy miasta. Największą liczbą dokonanych zakupów charakteryzuje się miasto Yangon, zaś najmniejszą Naypyitaw.
+
+Zobrazujemy teraz liczbę płatności ze względu na sposób ich dokonania. 
+
+```{r}
+ggplot(dane, aes(dane$Payment)) +
+  geom_bar(fill="lightpink")+
+  xlab("Rodzaj płatności") +
+  ylab("Ilość płatności")
+```
+
+Intepretacja: Wykres przedstawia ilość płatności z podziałem na rodzaje. Największym zainteresowaniem cieszy się 
+tradycyjna płatność, czyli płatność gotówką oraz elektronicznym portfelem, natomiast najmniejszym karta kredytowa
+jest to duże zaskoczenie, patrząc na to, że coraz więcej społeczeństwa odbiega od używania gotówki.
+
+Ostatnią tego typu graficzną prezentacją jest stosunek ilości produktów przynależących do określonych grup. 
+
+```{r}
+ggplot(dane, aes(dane$Product.line)) +
+  geom_bar(fill="orange2")+
+  xlab("Rodzaj produktu") +
+  ylab("Ilość")
+```
+
+Intepretacja: Wykres kolumnowy przedstawia ilość produktów, które posiada każdy z rodzai produktów. Najwięcej produktów należy do grupy pod nazwą:modowe akcesoria, zaś najmniejszą: zdrowie i uroda. 
+
+Następnie postanowiliśmy wykonać wizualizację rozkładów poszczególnych zmiennych ilościowych. Zaczęliśmy od przedstawienia za pomocą histogramu relacji ilości produktów zakupionych przez klientów. 
+
+```{r}
+ggplot(dane, aes(dane$Quantity)) +
+  geom_histogram(fill="lightblue")+
+  xlab("Ilość produktów") +
+  ylab("Potwórzenia ilości produktów zakupionych przez klientów")
+```
+
+Intepretacja: Wykres przedstawia powtórzenia w kontekście ilości produktó zakupionych przez klientów sklepu. Największy wynik wynosi 10 produktów, ponieważ powtórzył się on ponad 100 razy. Natomiast najmniejszą ilością charakteryzuje się ilość 8 produktów, bo powtórzenia wyniosły tylko ok. 86 powtórzeń. 
+
+Następnie zastanowiliśmy się na tym jak wygląda rozkład opłaty podatkowej. 
+
+```{r}
+ggplot(dane, aes(dane$Tax.5.)) +
+geom_density(fill = "cornsilk")+
+  xlab("Opłata podatkowa") +
+  ylab("Ilość powtórzeń występującej opłaty podatkowej")
+```
+
+Intepretacja: Wykres przedstawia rozkład opłat podatkowych w wysokości 5% dla klienta dokonującego zakupy można stwierdzić, że największą ilościa charakteryzuje się podatek o wysokości ok. 6-7 dolara.
+
+Wizualizacji poddaliśmy również liczbę kupionych produktów w danej cenie w różnych oddziałach supermarketów. 
+
+```{r}
+ggplot(dane, aes(dane$Unit.price)) +
+  geom_histogram(binwidth = 4, center = 2.5, fill = "green3") +
+  facet_wrap(vars(dane$Branch)) +
+  xlab("Cena każdego produktu [$]") +
+  ylab("Ilość powtórzeń")
+```
+
+Intepretacja: Wizualizacja rozkładów z podziałem na oddział supercentrum pokazuje nam ile razy kupiono produkt za daną cenę. Największymi wynikami wyróżnia się supercentrum C, czyli miejscowość Naypyitaw, ponieważ posiada największą ilość powtórzeń ceny 100 dolara w porównaniu z  innymi oddziałami.
+
+Zbadaliśmy również jak wygląda rozkład ocen satysfakcji z podziałem na płeć. 
+
+```{r}
+ggplot(dane, aes(dane$Rating)) +
+  geom_histogram(binwidth = 4, center = 2.5, fill = "pink") +
+  facet_wrap(vars(dane$Gender)) +
+  xlab("Ocena satysfakcji") +
+  ylab("Ilość powtórzeń")
+```
+
+Intepretacja: Wizualizacja rozkładów obrazuje nam ilość ocen satysfakcji w oparciu na podział względem  płci. Mężczyźni wyróżniają się na tle kobiet, ponieważ najczęściej z większą ilością powtórzeń wybierali oceny w przedziale od 5.0-8.0.
+Kobiety również skłaniały się do tego samego przedziału, jednakże możemy zauważyć, że sklep Biedronka posiada więcej klientów płci męskiej, niż płci żeńskiej. 
+
+Za ciekawe uznaliśmy również przedstawienie za pomocą wykresu, cen z podatkiem w poszczególnych miesiącach. W tym celu musieliśmy wgrać niezbędne biblioteki. 
+
+```{r}
+install.packages("colorspace")
+install.packages("ggforce")
+install.packages("ggridges")
+library(colorspace)
+library(ggforce)
+library(ggridges)
+
+dane$month <- format( as.Date (dane$Date, format=" %m/%d/%Y ")," %m ")
+ggplot(dane, aes(x = dane$month, y = dane$gross.income)) +
+  geom_point(size = 0.75, fill="black") +
+      xlab("Miesiąc") +
+      ylab("Dochód brutto")
+```
+
+Intepretacja: analizując rozkład, który opiera się podziałem na miesiące względem dochodu brutto, można stwierdzić iż styczeń był najbardziej dochodowym miesiącem, jeśli chodzi o ceny posiadające wysoki zysk brutto. Natomiast najniższy dochód brutto osiągnięty przez filie supermarketu został osiągnięty w marcu. 
+
+## Analiza opisowa - z czym w końcu mamy do czynienia? 
+
+Gdy już nasz zbiór danych nie skrywa wizualnych tajemnic, możemy ruszać do pracy z analizą opisową. Zaczynamy od wyznaczenia zakresu cen z wliczonym podatkiem oraz prac z tymi informacjami. 
+
+```{r}
+range(dane$Total) #znajdujemy zakres cen z wliczonym podatkiem
+max(dane$Total)-min(dane$Total)
+```
+
+Intepretacja: Biedronka charakteryzuje się minimalną (10.68) oraz maksymalną ceną z podatkiem (1042.65), co pozwala stwierdzić, że sklep dyskontowy charakteryzuje się zróżnicowanym poziomem cen w produktach, które posiada. Z przedstawionych powyżej operacji wiadomym jest również, że różnica pomiędzy maksymalną, a minimalną ceną (z podatkiem) wynosi 1031.97 dolara. 
+
+Przejdziemy teraz do dalszych prac.
+
+```{r}
+limits<-cut(dane$Total,seq(0,1100,by=100))
+table1<-table(limits)
+transform(table1,Rel_Freq=prop.table(Freq),Cum_Freq=cumsum(Freq))
+
+# Przedstawmy powyższe na wykresie 
+
+hist(dane$Total,prob=TRUE,breaks=seq(0,1100,by=100),main="Total",sub="w $")
+lines(density(dane$Total),col=6)
+
+install.packages("classInt")
+library(classInt)
+
+tab1<-classIntervals(dane$Total,n=11,style="fixed",fixedBreaks=seq(0,1100,by=100))
+tab1
+
+jenks.tests(tab1)
+```
+
+Zajmiemy się teraz statystykami opisowymi dla zmian całkowitej sprzedaży wraz z podatkiem. Oprócz obecnych pakietów, potrzebny będzie jeszcze inny: "kableExtra". 
+
+```{r}
+install.packages("kableExtra")
+library(dplyr)
+library(kableExtra)
+dane%>%
+  group_by(Gender)%>%
+  summarize('Suma sprzedaży'=sum(dane$Total),
+            'Średnia sprzedaż'=mean(dane$Total),
+            'Mediana sprzedaży'=median(dane$Total),
+            'Minimalna sprzedaż'=min(dane$Total),
+            'Maksymalna sprzedaż'=max(dane$Total),
+            'Odchylenie standardowe'=sd(dane$Total))%>%
+  arrange(desc('Suma sprzedaży')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+```
+
+Analizując statystyki opisowe z podziałem na płeć w kontekście sprzedaży, można wyciągnąć wiele wniosków. Średnia sprzedaż dla kobiet wyniosła 335,10 dolary, a dla mężczyzn 310,79 dolary, jest to mniej niż dla płci przeciwnej, tylko o około 25 dolarów. Z kolei Maksymalna sprzedaż wyniosła u kobiet 1042,65 dolara, a u mężczyzn 1039,29 dolara. Odchylenie standardowe dla płci pięknej wyniosło 249,32 dolara, a dla płci przeciwnej 242,02 dolara. Statystyki opisowe wskazują na to, że wydatki na zakupy nie różnią się  szczególnie między badanymi płciami. 
+
+Teraz zajmiemy się spojrzeniem na statystyki dotyczące oceny satysfakcji klienta. 
+
+```{r}
+dane%>%
+  group_by(City)%>%
+  summarize('Suma ocen satysfakcji klientów'=sum(dane$Rating),
+            'Średnia ocen satysfakcji'=mean(dane$Rating),
+            'Mediana ocen satysfakcji'=median(dane$Rating),
+            'Minimalna ocena satysfakcji'=min(dane$Rating),
+            'Maksymalna ocena satysfakcji'=max(dane$Rating),
+            'Odchylenie standardowe'=sd(dane$Rating))%>%
+  arrange(desc('Suma ocen satysfakcji')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+```
+
+Analizując statystyki opisowe z podziałem na miasta w ocen satysfakcji klientów, można wyciągnąć wiele wniosków. 
+Średnia ocen satysfakcji dla Mandalay wyniosła 6,82, dla Naypyitaw 7,07, z kolei dla Yangon niewiele mniej, bo 7,03. Z kolei minimalna ocena satysfkacji w każdym z wymienionych miast wyniosła 4. Odchylenie standardowe dla Mandalay wyniosło 1,71, a dla Naypyitaw 1,70, z kolei dla Yangon 1,73, jest to zdecydowanie największe odchylenie standardowe. Statystyki opisowe wskazują na to, że najgorzej zostały ocenione zakupy w mieście Mandalay.
+
+Kolejne statystyki dotyczą natomiast cen produktów.  
+
+```{r}
+dane%>%
+  group_by(Product.line)%>%
+  summarize('Suma ocen satysfakcji klientów'=sum(Rating),
+            'Średnia ocen satysfakcji'=mean(Rating),
+            'Mediana ocen satysfakcji'=median(Rating),
+            'Minimalna ocena satysfakcji'=min(Rating),
+            'Maksymalna ocena satysfakcji'=max(Rating),
+            'Odchylenie standardowe'=sd(Rating))%>%
+  arrange(desc('Suma cen produktów')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+```
+
+Analizując statystyki opisowe z podziałem rodzaj produktów w kontekscie do ocen satysfakcji klientów, można wyciągnąć wiele wniosków. Średnia ocen satysfakcji dla elektroniki wyniosła 6,92, dla modowych akcesoriów wyniosło 7,03, kolejno dla jedzenia i napoi 7,11. Z kolei zdrowie i uroda kształtowało się z wynikiem 7,00, a akcesoria domowe 6,84, na sam koniec sport i podróże kształtują się z wynikiem 6,91. Minimalna cena satysfkacji w każdym z wymienionej kategorii produktów wyniosła 4, poza akcesoriami domowymi, gdzie wyniosło 4,1. Największym odchyleniem standardowym może się pochwalić zdrowie i uroda, kształtuję się z wymikiem 1,76.
+
+Naszą uwagę poświęciliśmy również statystykom dotyczącym danych o rodzaju płatności z uwzględnieniem ceny zawierającej podatek. 
+
+```{r}
+dane%>%
+  group_by(Payment)%>%
+  summarize('Suma sprzedaży'=sum(Total),
+            'Średnia sprzedaż'=mean(Total),
+            'Mediana sprzedaży'=median(Total),
+            'Minimalna sprzedaż'=min(Total),
+            'Maksymalna sprzedaż'=max(Total),
+            'Odchylenie standardowe'=sd(Total))%>%
+  arrange(desc('Suma sprzedaży')) %>%
+  kbl()%>%
+  kable_styling(bootstrap_options = c("striped", "hover","responsive"),position="center")
+```
+
+Analizując statystyki opisowe z podziałem na rodzaj płatności względem sum sprzedaży, można wyciągnąć wiele wniosków. 
+Średnia sprzedaż dla formy płatności gotówkowej wyniosła 326,18, dla karty kredytowej 324,00, z kolei dla eportfela niewiele mniej, bo 318,82. Z kolei minimalna sprzedaż kwalifikowała się do płatności za pomocą gotówki. Odchylenie standardowe dla gotówki wyniosło 242,66 dolara, a dla karty kredytowej 257,11 dolara, z kolei dla Yangon eportfela 239,31 dolara. Karta kredytowa charakteryzuje się największym odchyleniem standardowym. Statystyki opisowe pokazują, że najczęstszą formą korzystania z płatności przez klientów była gotówkowa. 
+
+## Wnioskowanie - warto sprawdzić pytania badawcze! 
+
+Hipotezy, które postawiliśmy w niniejszym projekcie na potrzeby weryfikacji wybranych zjawisk. 
+
+Prace w tym zakresie rozpoczynamy od pobrania niezbędnych bibliotek do R, popularnych z zakresu testowania statystycznego. 
+```{r}
+install.packages("ggstatsplot")
+library(ggstatsplot)
+```
+
+Pierwszy wariant hipotez: 
+H0: Kobiety kupują tyle samo produktów z kategorii: zdrowie i uroda co mężczyźni; 
+H1: Kobiety kupują więcej produktów z kategorii: zdrowie i uroda niż mężczyźni.
+
+```{r}
+data=dane
+x=dane$Gender
+y=dane$Product.line
+ggpiestats(x=Gender,
+           y=Product.line,
+           data=dane)
+```
+
+Wartość p (p-value) na poziomie 0,33 pokazuje, że nie ma podstaw do odrzucenia hipotezy zerowej. Oznacza to, że kobiety i mężczyźni rzeczywiście kupują tyle samo produktów w kategorii "zdrowie i uroda". 
+
+Drugi wariant hipotez: 
+H0: Mężczyźni kupują tyle samo produktów z kategorii: elektronika co kobiety; 
+H1: Mężczyźni kupują więcej produktów z kategorii: elektronika niż kobiety. 
+
+```{r}
+data=dane
+x=dane$Gender
+y=dane$Product.line
+ggpiestats(x=Gender,
+           y=Product.line,
+           data=dane)
+```
+
+Wartość p (p-value) na poziomie 0,33 pokazuje, że nie ma podstaw do odrzucenia hipotezy zerowej. Oznacza to, że mężczyźni kupują tyle samo produktów z kategorii: elektronika co kobiety. 
+
+Trzeci wariant hipotez: 
+H0: Klienci posiadający kartę lojalnościową wydają tyle samo co osoby jej nieposiadające; 
+H1: Klienci posiadający kartę lojalnościową wydają więcej od osób jej nieposiadających. 
+
+```{r}
+data=dane
+x=dane$Customer.type
+y=dane$Total
+
+ggbetweenstats(x=Customer.type,
+           y=Total,
+           data=dane)
+```
+
+Wynik wartości p (p-value) na poziomie 0,53 pokazuje, że nie ma podstaw do odrzucenia hipotezy zerowej. Oznacza to, że klienci posiadający kartę lojalnościową wydają tyle samo, co osoby jej nieposiadające. 
+
+Czwarty wariant hipotez: 
+H0: Mężczyźni płacą za zakupy eportfelem równie często co kobiety; 
+H1: Mężczyźni rzadziej od kobiet płacą za zakupy eportfelem. 
+
+```{r}
+data=dane
+x=dane$Gender
+y=dane$Payment
+ggpiestats(x=Gender,
+           y=Payment,
+           data=dane)
+```
+
+Wynik wartości p (p-value) na poziomie 0,23 pokazuje, że nie ma podstaw do odrzucenia hipotezy zerowej. Oznacza to, że mężczyźni płacą za zakupy eportfelem równie często co kobiety. 
+
+## Podsumowanie i wnioski końcowe - co wiemy z całej pracy? 
+
+Jesteśmy przekonani, że projekt zaliczeniowy wyczerpał tematykę naszego zadania. Na każdym etapie projektu tłumaczyliśmy poszczególnie wykonywane kroki i uzyskane wyniki wypisanych żądań. Niemniej jednak, warto wskazać co wiemy z całej pracy. Przede wszystkim to, że do analizy danych trzeba podchodzić w sposób holistyczny. Na początku, gdy czyściliśmy dane, rzeczywiście mogliśmy radować się z nieobecności braków w danych. Przezornie sprawdziliśmy występowanie jednak innych danych, które mogłyby wpłynąć na dalsze efekty działań, czyli na obserwacje odstające. Ich wykrycie pozwoliło zadecydować o ich pozostawieniu, gdyż nie były na tyle istotne, aby nadmiernie się nimi przejmować. Następnym zdaniem była wizualizacja danych, która pozwoliła nam dosłownie zobaczyć występujące relacje między odpowiednimi zmiennymi w zbiorze danych. Przeprowadzonym operacją towarzyszyła sumienność i opieka nad tym, aby wgląd w dane był jak najbardziej precyzyjny. Posługiwaliśmy się w tym celu różnymi typami wykresu od histogramów po wykresy skrzypcowe. Następnie przeszliśmy do wypisania interesujących nas statystyk. Takie zadanie to właściwie sama przyjemność i wykazanie wprost tego, co na wykresie czasami nie jest do końca widoczne. Przeprowadzenie hipotez statystycznych pozwoliło natomiast odpowiedzieć na postawione pytania badawcze. Warto zauważyć, że wyniki nie zaskoczyły i nie różniły się od rzeczywistych przekonań.   
+
+
+
+
+
