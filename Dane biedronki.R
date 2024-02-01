@@ -16,32 +16,57 @@ library(ISLR)
 
 dane
 
-# Sprawdzam, ile przypadków danych jest kompletnych (czyli brak NA)
+Przechodząc do czyszczenia, cały proces rozpoczeliśmy od sprawdzenia, ile przypadków danych jest kompletnych, czyli czy występując NA. Jednak braki danych to nie wszystko. Postanowiliśmy sprawdzić, czy w zbiorze danych znajdują się jakieś wartości specjalne. Do tego posłużyła specjalna funkcja. Na wypadek, gdyby pojawiły się jakieś wartości specjalne, zdecydowaliśmy się, że przypiszemy im wartości NA. W tym celu wykorzystaliśmy pętlę. Tak przeprowadzone operacje pozwalają wydrukować statystyki opisowe dla zmiennych. 
+
+```{r}
 sum(complete.cases(dane))
 
-# Sprawdzam, czy dane zawierają jakieś inne niż NA wartości specjalne
 is.special <- function(x){
   if (is.numeric(x)) !is.finite(x) else is.na(x)}
 sapply(dane, is.special)
 
-# Tworzę pętlę, która ma przypisać ew. specjalne wartości do NA
 for (n in colnames(dane)){
   is.na(dane[[n]]) <- is.special(dane[[n]])
 }
-
-# Wydruk statystyk opisowych dla zmiennych 
 summary(dane)
+```
 
-# Instaluję pakiet naniar, celem zwizualizowania obecności NA 
-install.packages("naniar")
-library(naniar)
+Powyższy kod pozwala stwierdzić, że w zbiorze danych nie ma NA. Jednak postanowiliśmy zagłębić się jeszcze w słuszność tego twierdzenia. Ostatecznym potwierdzeniem będzie dla nas wizualizacja obecności ewentualnych NA. W tym celu pobraliśmy specjalny pakiet "naniar". 
+```
+# Wizualizacja brakujących danych dla całego zbioru za pomocą pakietu naniar. 
+```
+#Warto jednak spojrzeć dzięki wykresom na braki danych poszczególnych zmiennych. Przedstawimy to za pomocą konkretnego typu --> wykresów punktowych w relacji do zmiennej Total.
+```{r}
 vis_miss(dane)
-# Ciekawa obserwacja (to są te NA czy ich nie ma?) 
-dane %>% 
-  select(Tax.5.,Total)
-gg_miss_fct(dane2, fct = Total)
+```
+#Niesamowite narzędzie naniar pozwala na stworzenie shadowmap. Takie wykresy pokażemy również dla wybranych zmiennych
+```{r}
+ggplot(dane, aes(x = Tax.5., y = Total)) +
+  geom_density_2d_filled() +
+  theme_minimal() +
+  ggtitle("Shadowmapa dla Tax.5. vs Total")
+```
 
-# Tworzę wykresy dla każdej zmiennej, aby sprawdzić jak wygląda ich ukształtowanie
+```{r}
+ggplot(dane, aes(x = Unit.price, y = Total)) +
+  geom_density_2d_filled() +
+  theme_minimal() +
+  ggtitle("Shadowmap dla Unit.price vs Total")
+
+```{r}
+ggplot(dane, aes(x = cogs, y = Total)) +
+  geom_density_2d_filled() +
+  theme_minimal() +
+  ggtitle("Shadowmap dla cogs vs Total")
+```{r}
+ggplot(dane, aes(x = gross.income, y = Total)) +
+  geom_density_2d_filled() +
+  theme_minimal() +
+  ggtitle("Shadowmap dla gross.margin.percentage vs Total")
+```
+Co do braków danych mamy już absolutną pewność. Dzięki temu możemy pójść dalej i spojrzeć na to jak ukształtowują się zmienne jakościowe (liczbowe). W tym celu wykorzystamy popularną metodę wizualizacji - wykresy pudełkowe.Taki zabieg na danych pozwoli na wyselekcjonowanie tych zmiennych ciągłych, które zawierają wartości odstające. 
+
+```{r}
 boxplot(dane$Unit.price)
 boxplot(dane$Tax.5.) #zawiera wartości odstające
 boxplot(dane$Total) #zawiera wartości odstające 
@@ -49,26 +74,4 @@ boxplot(dane$cogs) #zawiera wartości odstające
 boxplot(dane$gross.margin.percentage) 
 boxplot(dane$gross.income) #zawiera wartości odstające
 boxplot(dane$Rating)
-
-# Wyselekcjonowanie wartości odstających 
-odstające_Tax.5 <- boxplot.stats(dane$Tax.5.)$out
-odstające_Tax.5_r <- which(dane$Tax.5. %in% odstające_Tax.5)
-dane[odstające_Tax.5_r,]
-
-odstające_Total <- boxplot.stats(dane$Total)$out
-odstające_Total_r <- which(dane$Total %in% odstające_Total)
-dane[odstające_Total_r,]
-
-odstające_cogs <- boxplot.stats(dane$cogs)$out
-odstające_cogs_r <- which(dane$cogs %in% odstające_cogs)
-dane[odstające_cogs_r,]
-
-odstające_gross.income <- boxplot.stats(dane$gross.income)$out
-odstające_gross.income_r <- which(dane$gross.income %in% odstające_gross.income)
-dane[odstające_gross.income_r,]
-
-
-
-
-
-
+```
